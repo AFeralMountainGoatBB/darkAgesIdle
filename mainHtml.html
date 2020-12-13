@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/underscore@1.12.0/underscore-min.js"></script>
+  <script src="classes.js" charset="utf-8"></script>
+  <link rel="stylesheet" type="text/css" href="cssMain.css" />
+  <meta charset="utf-8" />
+  <title>Passive Income Game</title>
+</head>
+
+<body>
+  <div id="page">
+    <div id="cover">
+    </div>
+    <div id="controlDiv">
+      <button id="startButton" onClick="startTick()">Start</button>
+      <button id="stopButton" onClick="stopTick()">Stop </button>
+      <button id="tickRateSlowButton" onClick="changeTickRate(3000)"> Set Tick Rate Slow</button>
+      <button id="tickRateMediumButton" onClick="changeTickRate(2000)"> Set Tick Rate Medium</button>
+      <button id="tickRateFastButton" onClick="changeTickRate(1000)"> Set Tick Rate Fast</button>
+    </div>
+    <div id="resourcesDiv">
+      <div id="resourcesTableContainer">
+      </div>
+      <h2>CashCount: <span id="cashOnHandSpan"> 0 </span></h2>
+      <button id="buttonIncreaseCash" onclick="increaseCash(1)">Increase Cash</button>
+      <script type="text/template" id="resourcesTemplate">
+        <table id="resourcesTable">
+        <tr id="firstRow">
+  						<td>Food:</td>
+  						<td><%= ownedFood %></td>
+              <td>Wood:</td>
+  						<td><%= ownedWood %></td>
+              <td>Stone:</td>
+  						<td><%= ownedStone %></td>
+              <td>Metal:</td>
+  						<td><%= ownedMetal %></td>
+  			</tr>
+      </table>
+    </script>
+    </div>
+    <div id="purchaseDiv">
+      <div id="purchaseStocks">
+        <button id="buttonPurchasePennyStock" onClick="purchaseStock(0)"> Buy Penny Stock </button>
+        <span id="pennyStockCostIncome">$10/$1</span> </br>
+        <button id="buttonPurchaseLowStock" onClick="purchaseStock(1)"> Buy Cheap Stock </button>
+        <span id="lowStockCostIncome">100/5</span></br>
+        <button id="buttonPurchaseMediumStock" onClick="purchaseStock(2)"> Buy Normal Stock </button>
+        <span id="mediumStockCostIncome">1,000/25</span></br>
+        <button id="buttonPurchaseHighStock" onClick="purchaseStock(3)"> Buy Expensive Stock </button>
+        <span id="highStockCostIncome">10,000/125</span></br>
+      </div>
+    </div>
+    <script src="main.js" charset="utf-8"></script>
+
+</body>
+
+</html>
