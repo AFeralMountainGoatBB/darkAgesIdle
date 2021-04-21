@@ -16,6 +16,7 @@ import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import AddIcon from "@material-ui/icons/Add";
 import FaceIcon from "@material-ui/icons/Face";
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,11 +27,18 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     color: theme.palette.text.secondary,
   },
+  paperSmall: {
+    padding: theme.spacing(1),
+    textAlign: "center",
+    color: theme.palette.text.secondary,
+    fontSize:"10px"
+  },
 }));
 
 function App() {
   const classes = useStyles();
   const [foodValue, setFoodValue] = useState(1);
+  const [foodIncomeRate, setFoodIncomeRate]=useState("0/s");
   const [woodValue, setWoodValue] = useState(0);
   const [stoneValue, setStoneValue] = useState(0);
   const [metalValue, setMetalValue] = useState(0);
@@ -39,38 +47,38 @@ function App() {
 
   const [fieldValue, setFieldValue] = useState({
     value: 0,
-    initialPrice: 1,
-    currentPrice: 1,
-    foodMultiplier: 1,
+    initialPrice: {foodCost:100, woodCost:10, peasantCost:10},
+    currentPrice: {foodCost:100, woodCost:10, peasantCost:10},
+    foodMultiplier: 10,
     priceIncreaseModifier: 1.07,
   });
   const [forestValue, setForestValue] = useState({
     value: 0,
     initialPrice: 1,
     currentPrice: 1,
-    woodMultiplier: 1,
+    woodMultiplier: 10,
     priceIncreaseModifier: 1.07,
   });
   const [outcropValue, setOutcropValue] = useState({
     value: 0,
     initialPrice: 1,
     currentPrice: 1,
-    stoneMultiplier: 1,
+    stoneMultiplier: 10,
     priceIncreaseModifier: 1.07,
   });
   const [prospectValue, setDepositValue] = useState({
     value: 0,
     initialPrice: 1,
     currentPrice: 1,
-    metalMultiplier: 1,
+    metalMultiplier: 10,
     priceIncreaseModifier: 1.07,
   });
 
   const [peasantValue, setPeasantValue] = useState({
     value: 0,
-    initialPrice: 1,
-    currentPrice: 1,
-    foodIncome: 1,
+    initialPrice: {foodCost:1},
+    currentPrice: {foodCost:1},
+    foodIncome: 0.5,
     priceIncreaseModifier: 1.07,
   });
   const peasantValueRef = useRef(peasantValue);
@@ -81,20 +89,22 @@ function App() {
   function handleBuyPeasants() {
     var currentPeasantCost = peasantValueRef.current.currentPrice;
     var currentFoodValue = foodValueRef.current;
-    // console.log("handle click", currentFoodValue, currentPeasantCost);
-    if (currentFoodValue >= currentPeasantCost) {
-      var newFoodValue = currentFoodValue - currentPeasantCost;
-      // console.log("yes food value greater");
+     console.log("handle click food value vs ref", foodValue, foodValueRef);
+     console.log("handle click peasant value vs ref", peasantValue, peasantValueRef);
+    if (currentFoodValue >= currentPeasantCost.foodCost) {
+      var newFoodValue = currentFoodValue - currentPeasantCost.foodCost;
+       console.log("yes food value greater, new FoodValue", newFoodValue);
       var newPeasantValue = peasantValueRef.current.value + 1;
       var newPeasantCost = Math.ceil(
-        peasantValueRef.current.currentPrice *
+        currentPeasantCost.foodCost *
           peasantValueRef.current.priceIncreaseModifier
       );
       setFoodValue(newFoodValue);
       setPeasantValue({
         ...peasantValue,
         value: newPeasantValue,
-        currentPrice: newPeasantCost,
+        currentPrice: {...currentPeasantCost,
+        foodCost:newPeasantCost},
       });
     }
 
@@ -104,16 +114,46 @@ function App() {
     }
   }
 
+  function handleBuyItem(itemValue, setState, itemReference) {
+    var costs = itemValue.currentPrice;
+    if(costs.foodCost<=foodValue.value && costs.woodCost<=woodValue.value && costs.peasantCost<=peasantValue.value)
+    {
+
+    }
+
+    // var currentPeasantCost = peasantValueRef.current.currentPrice;
+    // var currentFoodValue = foodValueRef.current;
+    // // console.log("handle click", currentFoodValue, currentPeasantCost);
+    // if (currentFoodValue >= currentPeasantCost) {
+    //   var newFoodValue = currentFoodValue - currentPeasantCost;
+    //   // console.log("yes food value greater");
+    //   var newPeasantValue = peasantValueRef.current.value + 1;
+    //   var newPeasantCost = Math.ceil(
+    //     peasantValueRef.current.currentPrice *
+    //       peasantValueRef.current.priceIncreaseModifier
+    //   );
+    //   setFoodValue(newFoodValue);
+    //   setPeasantValue({
+    //     ...peasantValue,
+    //     value: newPeasantValue,
+    //     currentPrice: newPeasantCost,
+    //   });
+    // }
+
+    if (!tickingBool) {
+      constantTick();
+      setTickBool(true);
+    }
+  }
+
   function constantTick() {
-    // setPeasantValue(peasantValueRef.current+1);
     console.log("tick");
     calculateIncome();
     setTimeout(constantTick, 1000);
-    // setTimeout(()=>{setPeasantValue(peasantValue+1)}, 1000);
   }
 
   function calculateIncome() {
-    //calc income for food
+    //calc income for each resource individually
     foodIncome();
     //woodIncome();
    // stoneIncome();
@@ -123,6 +163,7 @@ function App() {
     var foodIncome =
       peasantValueRef.current.foodIncome * peasantValueRef.current.value;
     setFoodValue(foodValueRef.current + foodIncome);
+    setFoodIncomeRate(foodIncome);
   }
   function woodIncome() {
     var foodIncome =
@@ -144,10 +185,12 @@ function App() {
     <div className="App">
       {/* <InfoGrid value1={peasantValue} value2={foodValue} value3={valuethree} ></InfoGrid> */}
       {/* <GameMaster/> */}
+
       <div className={classes.root}>
         <Grid container spacing={5}>
           <Grid item xs={3}>
             <Paper className={classes.paper}>Food: {foodValue}</Paper>
+            <Paper className={classes.paperSmall}>{foodIncomeRate}</Paper>
           </Grid>
           <Grid item xs={3}>
             <Paper className={classes.paper}>Wood: {woodValue}</Paper>
@@ -168,6 +211,7 @@ function App() {
           alignItems="center"
         >
           <Grid item xs={6}>
+          <Tooltip disableFocusListener disableTouchListener title="Peasants generate resources, and are trained to be workers">
             <Paper className={classes.paper}>
               <FaceIcon /> Peasants: {peasantValue.value}
               <IconButton
@@ -178,6 +222,7 @@ function App() {
                 <AddIcon />
               </IconButton>
             </Paper>
+            </Tooltip>
           </Grid>
         </Grid>
         <Grid
