@@ -47,8 +47,8 @@ function App() {
 
   const [fieldValue, setFieldValue] = useState({
     value: 0,
-    initialPrice: {foodCost:100, woodCost:10, peasantCost:10},
-    currentPrice: {foodCost:100, woodCost:10, peasantCost:10},
+    initialPrice: {foodCost:1, woodCost:0, peasantCost:0},
+    currentPrice: {foodCost:1, woodCost:0, peasantCost:0},
     foodMultiplier: 10,
     priceIncreaseModifier: 1.07,
   });
@@ -87,17 +87,19 @@ function App() {
   const [tickingBool, setTickBool] = useState(false);
 
   function handleBuyPeasants() {
-    var currentPeasantCost = peasantValueRef.current.currentPrice;
-    var currentFoodValue = foodValueRef.current;
+ //   var currentPeasantCost = peasantValueRef.current.currentPrice;
+    var currentPeasantCost = peasantValue.currentPrice;
+   // var currentFoodValue = foodValueRef.current;
+    var currentFoodValue = foodValue;
      console.log("handle click food value vs ref", foodValue, foodValueRef);
      console.log("handle click peasant value vs ref", peasantValue, peasantValueRef);
     if (currentFoodValue >= currentPeasantCost.foodCost) {
       var newFoodValue = currentFoodValue - currentPeasantCost.foodCost;
        console.log("yes food value greater, new FoodValue", newFoodValue);
-      var newPeasantValue = peasantValueRef.current.value + 1;
+      var newPeasantValue = peasantValue.value + 1;
       var newPeasantCost = Math.ceil(
         currentPeasantCost.foodCost *
-          peasantValueRef.current.priceIncreaseModifier
+          peasantValue.priceIncreaseModifier
       );
       setFoodValue(newFoodValue);
       setPeasantValue({
@@ -116,9 +118,26 @@ function App() {
 
   function handleBuyItem(itemValue, setState, itemReference) {
     var costs = itemValue.currentPrice;
-    if(costs.foodCost<=foodValue.value && costs.woodCost<=woodValue.value && costs.peasantCost<=peasantValue.value)
+    console.log("handling buy checking equals", itemValue);
+    if(costs.foodCost<=foodValue && costs.woodCost<=woodValue && costs.peasantCost<=peasantValue.value)
     {
-
+      console.log("handling the buy");
+    setFoodValue(foodValue - costs.foodCost);
+    setWoodValue(woodValue - costs.woodCost);
+    var newItemCost = newItemCost(itemValue);
+    
+    //   // console.log("yes food value greater");
+    //   var newPeasantValue = peasantValueRef.current.value + 1;
+    //   var newPeasantCost = Math.ceil(
+    //     peasantValueRef.current.currentPrice *
+    //       peasantValueRef.current.priceIncreaseModifier
+    //   );
+    //   setFoodValue(newFoodValue);
+    //   setPeasantValue({
+    //     ...peasantValue,
+    //     value: newPeasantValue,
+    //     currentPrice: newPeasantCost,
+    //   });
     }
 
     // var currentPeasantCost = peasantValueRef.current.currentPrice;
@@ -146,6 +165,11 @@ function App() {
     }
   }
 
+  function newItemCost(itemValue)
+  {
+
+  }
+
   function constantTick() {
     console.log("tick");
     calculateIncome();
@@ -163,7 +187,8 @@ function App() {
     var foodIncome =
       peasantValueRef.current.foodIncome * peasantValueRef.current.value;
     setFoodValue(foodValueRef.current + foodIncome);
-    setFoodIncomeRate(foodIncome);
+    var foodIncomeStr = foodIncome+"/s";
+    setFoodIncomeRate(foodIncomeStr);
   }
   function woodIncome() {
     var foodIncome =
@@ -234,6 +259,13 @@ function App() {
         >
           <Grid item xs={3}>
             <Paper className={classes.paper}>Field: {fieldValue.value}</Paper>
+            <IconButton
+                onClick={() => {
+                  handleBuyItem(fieldValue, setFieldValue, fieldValue);
+                }}
+              >
+                <AddIcon />
+              </IconButton>
           </Grid>
           <Grid item xs={3}>
             <Paper className={classes.paper}>Forest: {forestValue.value}</Paper>
