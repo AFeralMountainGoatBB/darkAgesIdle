@@ -8,8 +8,6 @@ import React, {
   useRef,
 } from "react";
 import Button from "@material-ui/core/Button";
-import GameMaster from "./GameMaster";
-import InfoGrid from "./components/InfoGrid.js";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
@@ -17,6 +15,8 @@ import IconButton from "@material-ui/core/IconButton";
 import AddIcon from "@material-ui/icons/Add";
 import FaceIcon from "@material-ui/icons/Face";
 import Tooltip from '@material-ui/core/Tooltip';
+import ResourceDisplay from './components/ResourceDisplay'
+import MultiplierDisplay from './components/MultiplierDisplay'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,8 +40,11 @@ function App() {
   const [foodValue, setFoodValue] = useState(1);
   const [foodIncomeRate, setFoodIncomeRate]=useState("0/s");
   const [woodValue, setWoodValue] = useState(0);
+  const [woodIncomeRate, setWoodIncomeRate] = useState("0/s");
   const [stoneValue, setStoneValue] = useState(0);
+  const [stoneIncomeRate, setStoneIncomeRate] = useState("0/s");
   const [metalValue, setMetalValue] = useState(0);
+  const [metalIncomeRate, setMetalIncomeRate] = useState("0/s");
   const foodValueRef = useRef(foodValue);
   foodValueRef.current = foodValue;
 
@@ -50,7 +53,7 @@ function App() {
     initialPrice: {foodCost:1, woodCost:0, peasantCost:0},
     currentPrice: {foodCost:1, woodCost:0, peasantCost:0},
     foodMultiplier: 10,
-    priceIncreaseModifier: 1.07,
+    priceIncreaseModifier: 1.30,
   });
   const [forestValue, setForestValue] = useState({
     value: 0,
@@ -76,8 +79,8 @@ function App() {
 
   const [peasantValue, setPeasantValue] = useState({
     value: 0,
-    initialPrice: {foodCost:1},
-    currentPrice: {foodCost:1},
+    initialPrice: {foodCost:1, woodCost:0, peasantCost:0},
+    currentPrice: {foodCost:1, woodCost:0, peasantCost:0},
     foodIncome: 0.5,
     priceIncreaseModifier: 1.07,
   });
@@ -86,88 +89,41 @@ function App() {
 
   const [tickingBool, setTickBool] = useState(false);
 
-  function handleBuyPeasants() {
- //   var currentPeasantCost = peasantValueRef.current.currentPrice;
-    var currentPeasantCost = peasantValue.currentPrice;
-   // var currentFoodValue = foodValueRef.current;
-    var currentFoodValue = foodValue;
-     console.log("handle click food value vs ref", foodValue, foodValueRef);
-     console.log("handle click peasant value vs ref", peasantValue, peasantValueRef);
-    if (currentFoodValue >= currentPeasantCost.foodCost) {
-      var newFoodValue = currentFoodValue - currentPeasantCost.foodCost;
-       console.log("yes food value greater, new FoodValue", newFoodValue);
-      var newPeasantValue = peasantValue.value + 1;
-      var newPeasantCost = Math.ceil(
-        currentPeasantCost.foodCost *
-          peasantValue.priceIncreaseModifier
-      );
-      setFoodValue(newFoodValue);
-      setPeasantValue({
-        ...peasantValue,
-        value: newPeasantValue,
-        currentPrice: {...currentPeasantCost,
-        foodCost:newPeasantCost},
-      });
-    }
-
-    if (!tickingBool) {
-      constantTick();
-      setTickBool(true);
-    }
-  }
-
-  function handleBuyItem(itemValue, setState, itemReference) {
-    var costs = itemValue.currentPrice;
+  function handleBuyItem(itemValue, setState) {
+    var amountPurchasing=1; //will make a control and variable later
+    var costs = calcItemCost(itemValue, amountPurchasing);
     console.log("handling buy checking equals", itemValue);
     if(costs.foodCost<=foodValue && costs.woodCost<=woodValue && costs.peasantCost<=peasantValue.value)
     {
       console.log("handling the buy");
     setFoodValue(foodValue - costs.foodCost);
     setWoodValue(woodValue - costs.woodCost);
-    var newItemCost = newItemCost(itemValue);
-    
-    //   // console.log("yes food value greater");
-    //   var newPeasantValue = peasantValueRef.current.value + 1;
-    //   var newPeasantCost = Math.ceil(
-    //     peasantValueRef.current.currentPrice *
-    //       peasantValueRef.current.priceIncreaseModifier
-    //   );
-    //   setFoodValue(newFoodValue);
-    //   setPeasantValue({
-    //     ...peasantValue,
-    //     value: newPeasantValue,
-    //     currentPrice: newPeasantCost,
-    //   });
+    //newPeasantValue
+    setPeasantValue({...peasantValue, 
+      value: peasantValue.value-costs.peasantCost});
+    setState({...itemValue,
+      value:itemValue.value+amountPurchasing})
     }
-
-    // var currentPeasantCost = peasantValueRef.current.currentPrice;
-    // var currentFoodValue = foodValueRef.current;
-    // // console.log("handle click", currentFoodValue, currentPeasantCost);
-    // if (currentFoodValue >= currentPeasantCost) {
-    //   var newFoodValue = currentFoodValue - currentPeasantCost;
-    //   // console.log("yes food value greater");
-    //   var newPeasantValue = peasantValueRef.current.value + 1;
-    //   var newPeasantCost = Math.ceil(
-    //     peasantValueRef.current.currentPrice *
-    //       peasantValueRef.current.priceIncreaseModifier
-    //   );
-    //   setFoodValue(newFoodValue);
-    //   setPeasantValue({
-    //     ...peasantValue,
-    //     value: newPeasantValue,
-    //     currentPrice: newPeasantCost,
-    //   });
-    // }
-
     if (!tickingBool) {
       constantTick();
       setTickBool(true);
     }
   }
 
-  function newItemCost(itemValue)
+  function calcItemCost(itemValue, amountPurchase)
   {
-
+    var currentOwned = itemValue.value;
+    //have to calc for every resource
+    
+    var totalCost = {}
+    for (var resource in itemValue.initialPrice)
+    {
+      totalCost[resource] = Math.ceil(itemValue.initialPrice[resource] 
+        *((Math.pow(itemValue.priceIncreaseModifier, currentOwned)
+        *(Math.pow(itemValue.priceIncreaseModifier, amountPurchase)-1))/(itemValue.priceIncreaseModifier-1))*100)/100;
+    }
+    console.log("final costs", totalCost);
+    return totalCost;
   }
 
   function constantTick() {
@@ -212,21 +168,11 @@ function App() {
       {/* <GameMaster/> */}
 
       <div className={classes.root}>
-        <Grid container spacing={5}>
-          <Grid item xs={3}>
-            <Paper className={classes.paper}>Food: {foodValue}</Paper>
-            <Paper className={classes.paperSmall}>{foodIncomeRate}</Paper>
-          </Grid>
-          <Grid item xs={3}>
-            <Paper className={classes.paper}>Wood: {woodValue}</Paper>
-          </Grid>
-          <Grid item xs={3}>
-            <Paper className={classes.paper}>Stone: {stoneValue}</Paper>
-          </Grid>
-          <Grid item xs={3}>
-            <Paper className={classes.paper}>Metal: {metalValue}</Paper>
-          </Grid>
-        </Grid>
+        <ResourceDisplay classes={classes} 
+        food={foodValue} foodrate={foodIncomeRate} 
+        wood={woodValue} woodrate={woodIncomeRate} 
+        stone={stoneValue} stonerate={stoneIncomeRate} 
+        metal={metalValue} metalrate={metalIncomeRate}></ResourceDisplay>
 
         <Grid
           container
@@ -241,42 +187,22 @@ function App() {
               <FaceIcon /> Peasants: {peasantValue.value}
               <IconButton
                 onClick={() => {
-                  handleBuyPeasants();
-                }}
-              >
+                  handleBuyItem(peasantValue, setPeasantValue);
+                }}>
                 <AddIcon />
               </IconButton>
             </Paper>
             </Tooltip>
           </Grid>
         </Grid>
-        <Grid
-          container
-          spacing={3}
-          direction="row"
-          justify="center"
-          alignItems="center"
-        >
-          <Grid item xs={3}>
-            <Paper className={classes.paper}>Field: {fieldValue.value}</Paper>
-            <IconButton
-                onClick={() => {
-                  handleBuyItem(fieldValue, setFieldValue, fieldValue);
-                }}
-              >
-                <AddIcon />
-              </IconButton>
-          </Grid>
-          <Grid item xs={3}>
-            <Paper className={classes.paper}>Forest: {forestValue.value}</Paper>
-          </Grid>
-          <Grid item xs={3}>
-            <Paper className={classes.paper}>Outcrop: {outcropValue.value}</Paper>
-          </Grid>
-          <Grid item xs={3}>
-            <Paper className={classes.paper}>Prospect: {prospectValue.value}</Paper>
-          </Grid>
-          </Grid>
+        
+        <MultiplierDisplay classes={classes}
+        field={fieldValue} setfield={setFieldValue}
+        forest={forestValue} 
+        outcrop={outcropValue}
+        prospect={prospectValue}
+        handleBuyItem={handleBuyItem}>
+        </MultiplierDisplay>
 
           <Grid
           container
