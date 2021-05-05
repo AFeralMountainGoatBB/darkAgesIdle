@@ -13,23 +13,26 @@ function MultiplierDisplay(props){
         alignItems="center"
         >
         <Grid item xs={3}>
-          <Paper className={props.classes.paper}>Field: {props.field.value}</Paper>
-          <IconButton
+          <Paper className={props.classes.paper}><div>Field: {props.buildings.fields.value}<IconButton size='small'
               onClick={() => {
-                props.handleBuyItem(props.field, props.setfield);
+                props.handleBuyItem(props.buildings.fields);
               }}
             >
-              <AddIcon />
+              <AddIcon style={{fontSize:'15px'}}/>
             </IconButton>
+            <Paper className={props.classes.paperSmall}>Multiplier {props.buildings.fields.multiplierDisplay}   Cost:{}           
+            </Paper> 
+           
+           </div> </Paper>
         </Grid>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper}>Forest: {props.forest.value}</Paper>
+          <Paper className={props.classes.paper}>Forest: {props.buildings.fields.value}</Paper>
         </Grid>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper}>Outcrop: {props.outcrop.value}</Paper>
+          <Paper className={props.classes.paper}>Outcrop: {props.buildings.fields.value}</Paper>
         </Grid>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper}>Prospect: {props.prospect.value}</Paper>
+          <Paper className={props.classes.paper}>Prospect: {props.buildings.fields.value}</Paper>
         </Grid>
         </Grid>)
 }
