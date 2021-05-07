@@ -37,6 +37,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function App() {
+  const classes = useStyles();
+  const [purchaseAmount, setPurchaseAmount] = useState(1);
+  const [tickingBool, setTickBool] = useState(false);
   const [resources, setResources] = useState({
     food: {
       id: "food",
@@ -60,6 +63,12 @@ function App() {
       income: {
         food: 0.1,
       },
+      displayIncome: {
+        food:"",
+        wood:"",
+        stone:"",
+        metal:""
+      }
     },
     farmers: {
       id: "farmers",
@@ -161,14 +170,83 @@ function App() {
   const buildingsRef = useRef(buildings);
 
   const [milestones, setMilestones]=useState({
-    "milestone 1":{achieved: false}
-  })
-  //old structures
-  const classes = useStyles();
-  const [purchaseAmount, setPurchaseAmount] = useState(1);
-  const [tickingBool, setTickBool] = useState(false);
+    workers:{ "peasant 1":{achieved: false, goals:{workers:{peasants: 50}}},
+    "peasant 2":{achieved: false, goals:{ workers:{peasants: 200}}},
+    "peasant 3":{achieved: false, goals: {workers:{peasants: 1000}}}},
+    buildings:{"fields 1":{achieved: false, goals:{buidlings:{fields: 1}}}},
+    resources:{}
+  });
+  const milestoneRef = useRef(milestones);
 
-  function handleBuyItem(item, setState) {
+  function updateMilestones(newState)
+  {
+    milestoneRef.current=newState;
+    setMilestones(newState);
+  }
+
+  function checkandUpdateMilestones()
+  {
+    var newMilestones = milestoneRef.current;
+    var shouldUpdate = false;
+    for (let category in milestoneRef.current)
+    {
+      for (let milestone in milestoneRef.current[category])
+      {
+        if (milestoneRef.current[category][milestone].achieved!==true)
+        {
+          //check milestone
+          if (checkMilestone(milestoneRef.current[category][milestone]))
+          {
+            newMilestones[category][milestone].achieved=true;
+            shouldUpdate=true;
+          }
+        }
+      }
+    }
+    if (shouldUpdate===true)
+    {
+      updateMilestones(newMilestones);
+    }
+  }
+
+  function checkMilestone(milestone)
+  {
+    let goals = milestone.goals;
+    let goalsMet = true;
+    if (goals.workers!==undefined)
+    {
+      for (let worker in goals.workers)
+      {
+          if (workersRef.current[worker].value<goals.workers[worker])
+          {
+            goalsMet=false;
+          }
+      }
+    }
+    if (goals.resources!==undefined)
+    {
+      for (let resource in goals.resources)
+      {
+          if (resourcesRef.current[resource].value<goals.resources[resource])
+          {
+            goalsMet=false;
+          }
+      }
+    }
+    if (goals.buildings!==undefined)
+    {
+      for (let building in goals.buildings)
+      {
+          if (buildingsRef.current[building].value<goals.buildings[building])
+          {
+            goalsMet=false;
+          }
+      }
+    }
+    return goalsMet;
+  }
+
+  function handleBuyItem(item) {
     var costs = calcItemCost(item);
     console.log("handling buy checking equals", item, costs);
     //check if affordable, and calc new values
