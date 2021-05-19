@@ -5,19 +5,17 @@ import Tooltip from '@material-ui/core/Tooltip';
 function ResourceDisplay(props)
 {
     //function displayResource, generates display string for resources
-    function displayResource(resource)
-    {
-      return ((Math.round(resource.value * 100) / 100).toFixed(2));
-    }
 
     return(
+      <div style={{padding:20,
+        overflowX:'hidden'}}>
     <Grid container spacing={5}>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper}>Food: {props.resources.food.value}</Paper>
+          <Paper className={props.classes.paper} style={{backgroundColor:"Wheat"}}>Food: {props.resources.food.value}</Paper>
           <Paper className={props.classes.paperSmall}>{props.resources.food.income}</Paper>
         </Grid>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper}>Wood: {props.resources.wood.value}</Paper>
+          <Paper className={props.classes.paper} style={{backgroundColor:"BurlyWood"}}>Wood: {props.resources.wood.value}</Paper>
           <Paper className={props.classes.paperSmall}>{props.resources.wood.income}</Paper>
         </Grid>
         <Grid item xs={3}>
@@ -28,7 +26,8 @@ function ResourceDisplay(props)
           <Paper className={props.classes.paper}>Metal: {props.resources.metal.value}</Paper>
           <Paper className={props.classes.paperSmall}>{props.resources.metal.income}</Paper>
         </Grid>
-      </Grid>)
+      </Grid>
+      </div>)
 }
 
 export default ResourceDisplay;

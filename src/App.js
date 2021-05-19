@@ -18,13 +18,15 @@ import Tooltip from "@material-ui/core/Tooltip";
 import ResourceDisplay from "./components/ResourceDisplay";
 import MultiplierDisplay from "./components/MultiplierDisplay";
 import Slider from "@material-ui/core/Slider";
+import WorkerDisplay from "./components/WorkerDisplay";
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
   paper: {
-    padding: theme.spacing(1),
+    padding: theme.spacing(2),
     textAlign: "center",
     color: theme.palette.text.secondary,
   },
@@ -34,6 +36,34 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
     fontSize: "10px",
   },
+  foodResourceCard:{
+    padding: theme.spacing(3),
+    textAlign: "center",
+    backgroundColor: "Wheat",
+    opacity:1,
+   backgroundImage: "url('https://www.transparenttextures.com/patterns/xv.png')"
+  },
+  woodResourceCard:{
+    padding: theme.spacing(3),
+    textAlign: "center",
+    backgroundColor: "Sienna",
+    opacity:1,
+   backgroundImage: "url('https://www.transparenttextures.com/patterns/tileable-wood-colored.png')"
+  },
+  stoneResourceCard:{
+    padding: theme.spacing(3),
+    textAlign: "center",
+    backgroundColor: "SlateGray",
+    opacity:1,
+   backgroundImage: "url('https://www.transparenttextures.com/patterns/brick-wall-dark.png')"
+  },
+  metalResourceCard:{
+    padding: theme.spacing(3),
+    textAlign: "center",
+    backgroundColor: "Silver",
+    opacity:1,
+   backgroundImage: "url('https://www.transparenttextures.com/patterns/carbon-fibre-v2.png')"
+  }
 }));
 
 function App() {
@@ -44,7 +74,7 @@ function App() {
     food: {
       id: "food",
       income: "0/s",
-      value: 1,
+      value: 10,
       multiplier: { global: 0, worker: 0 },
     },
     wood: { id: "wood", income: "0/s", value: 1, multiplier: 0 },
@@ -52,40 +82,52 @@ function App() {
     metal: { id: "metal", income: "0/s", value: 1, multiplier: 0 },
   });
   const resourcesRef = useRef(resources);
+
   const [workers, setWorkers] = useState({
     peasants: {
       id: "peasants",
       value: 0,
       purchased: 0,
-      initialCost: { resources: { food: 1 }, workers: {}, buildings: {} },
+      initialCost: { resources: { food: 10 }, workers: {}, buildings: {} },
       displayCost: "food 1",
       priceIncMod: 1.07,
       income: {
-        food: 0.1,
+        food: 1,
       },
       displayIncome: {
-        food:"",
-        wood:"",
-        stone:"",
-        metal:""
-      }
+        food: "",
+        wood: "",
+        stone: "",
+        metal: "",
+      },
     },
     farmers: {
       id: "farmers",
       value: 0,
       purchased: 0,
-      initialCost: { resources: { food: 10 }, workers: {peasants:1}, buildings: {} },
+      initialCost: {
+        resources: { food: 10 },
+        workers: { peasants: 1 },
+        buildings: {},
+      },
       displayCost: "food 10, peasants 1",
       priceIncMod: 1.2,
       income: {
         food: 0.1,
       },
+      displayIncome:{
+        food:"food 0/s"
+      }
     },
     woodsmen: {
       id: "woodsmen",
       value: 0,
       purchased: 0,
-      initialCost: { resources: { food: 20, wood:10 }, workers: {}, buildings: {} },
+      initialCost: {
+        resources: { food: 20, wood: 10 },
+        workers: {},
+        buildings: {},
+      },
       displayCost: "",
       priceIncMod: 1.3,
       income: {
@@ -116,11 +158,7 @@ function App() {
     },
   });
   const workersRef = useRef(workers);
-  function updateWorkers(newState)
-  {
-    workersRef.current=newState;
-    setWorkers(newState);
-  }
+
   const [buildings, setBuildings] = useState({
     fields: {
       id: "fields",
@@ -132,6 +170,11 @@ function App() {
       multiplier: {
         food: 0.1,
       },
+      multiplierDisplay:"0%",
+      updateMultiplierDisplay()
+      {
+        this.multiplierDisplay = Math.round(this.multiplier.food * this.value * 100)+"%";
+      }
     },
     forests: {
       id: "forests",
@@ -141,8 +184,13 @@ function App() {
       displayCost: "",
       priceIncMod: 1.8,
       multiplier: {
-        food: 0.1,
+        wood: 0.1,
       },
+      multiplierDisplay:"0%",
+      updateMultiplierDisplay()
+      {
+        this.multiplierDisplay = Math.round(this.multiplier.wood * this.value * 100)+"%";
+      }
     },
     outcrops: {
       id: "outcrops",
@@ -152,8 +200,13 @@ function App() {
       displayCost: "",
       priceIncMod: 2.0,
       multiplier: {
-        food: 0.1,
+        stone: 0.1,
       },
+      multiplierDisplay:"0%",
+      updateMultiplierDisplay()
+      {
+        this.multiplierDisplay = Math.round(this.multiplier.stone * this.value * 100)+"%";
+      }
     },
     prospects: {
       id: "prospects",
@@ -163,84 +216,88 @@ function App() {
       displayCost: "",
       priceIncMod: 2.5,
       multiplier: {
-        food: 0.1,
+        metal: 0.1,
       },
+      multiplierDisplay:"0%",
+      updateMultiplierDisplay()
+      {
+        this.multiplierDisplay = Math.round(this.multiplier.metal * this.value * 100)+"%";
+      }
     },
   });
   const buildingsRef = useRef(buildings);
 
-  const [milestones, setMilestones]=useState({
-    workers:{ "peasant 1":{achieved: false, goals:{workers:{peasants: 50}}},
-    "peasant 2":{achieved: false, goals:{ workers:{peasants: 200}}},
-    "peasant 3":{achieved: false, goals: {workers:{peasants: 1000}}}},
-    buildings:{"fields 1":{achieved: false, goals:{buidlings:{fields: 1}}}},
-    resources:{}
+  const [milestones, setMilestones] = useState({
+    workers: {
+      "peasant 1": { achieved: false, goals: { workers: { peasants: 50 } } },
+      "peasant 2": { achieved: false, goals: { workers: { peasants: 200 } } },
+      "peasant 3": { achieved: false, goals: { workers: { peasants: 1000 } } },
+      "field 1":{ achieved: false, goals: { buildings: { fields: 1 } } },
+    },
+    buildings: {
+      "fields 1": { achieved: false, goals: { buidlings: { fields: 1 } } },
+    },
+    resources: {},
   });
   const milestoneRef = useRef(milestones);
-
-  function updateMilestones(newState)
-  {
-    milestoneRef.current=newState;
-    setMilestones(newState);
+  function updateResources(newState) {
+    resourcesRef.current = newState;
+    setResources(newState);
   }
 
-  function checkandUpdateMilestones()
-  {
+  function updateWorkers(newState) {
+    workersRef.current = newState;
+    setWorkers(newState);
+  }
+  function updateBuildings(newState) {
+    buildingsRef.current = newState;
+    setBuildings(newState);
+  }
+  function updateMilestones(newState) {
+    milestoneRef.current = newState;
+    setMilestones(newState);
+  }
+  function checkandUpdateMilestones() {
     var newMilestones = milestoneRef.current;
     var shouldUpdate = false;
-    for (let category in milestoneRef.current)
-    {
-      for (let milestone in milestoneRef.current[category])
-      {
-        if (milestoneRef.current[category][milestone].achieved!==true)
-        {
+    for (let category in milestoneRef.current) {
+      for (let milestone in milestoneRef.current[category]) {
+        if (milestoneRef.current[category][milestone].achieved !== true) {
           //check milestone
-          if (checkMilestone(milestoneRef.current[category][milestone]))
-          {
-            newMilestones[category][milestone].achieved=true;
-            shouldUpdate=true;
+          if (checkMilestone(milestoneRef.current[category][milestone])) {
+            newMilestones[category][milestone].achieved = true;
+            shouldUpdate = true;
           }
         }
       }
     }
-    if (shouldUpdate===true)
-    {
+    if (shouldUpdate === true) {
       updateMilestones(newMilestones);
     }
   }
 
-  function checkMilestone(milestone)
-  {
+  function checkMilestone(milestone) {
     let goals = milestone.goals;
     let goalsMet = true;
-    if (goals.workers!==undefined)
-    {
-      for (let worker in goals.workers)
-      {
-          if (workersRef.current[worker].value<goals.workers[worker])
-          {
-            goalsMet=false;
-          }
+    if (goals.workers !== undefined) {
+      for (let worker in goals.workers) {
+        if (workersRef.current[worker].value < goals.workers[worker]) {
+          goalsMet = false;
+        }
       }
     }
-    if (goals.resources!==undefined)
-    {
-      for (let resource in goals.resources)
-      {
-          if (resourcesRef.current[resource].value<goals.resources[resource])
-          {
-            goalsMet=false;
-          }
+    if (goals.resources !== undefined) {
+      for (let resource in goals.resources) {
+        if (resourcesRef.current[resource].value < goals.resources[resource]) {
+          goalsMet = false;
+        }
       }
     }
-    if (goals.buildings!==undefined)
-    {
-      for (let building in goals.buildings)
-      {
-          if (buildingsRef.current[building].value<goals.buildings[building])
-          {
-            goalsMet=false;
-          }
+    if (goals.buildings !== undefined) {
+      for (let building in goals.buildings) {
+        if (buildingsRef.current[building].value < goals.buildings[building]) {
+          goalsMet = false;
+        }
       }
     }
     return goalsMet;
@@ -281,15 +338,24 @@ function App() {
       }
       //set values now
       console.log("tempResources before set", tempResources);
-      setResources({ ...resources, ...tempResources.resources });
+      updateResources({ ...resources, ...tempResources.resources });
       updateWorkers({ ...workers, ...tempResources.workers });
-      setBuildings({ ...buildings, ...tempResources.buildings });
+      updateBuildings({ ...buildings, ...tempResources.buildings });
       refreshPrices();
+      refreshMultiplierDisplays();
     }
 
     if (!tickingBool) {
       constantTick();
       setTickBool(true);
+    }
+  }
+
+  function refreshMultiplierDisplays()
+  {
+    for(let building in buildings)
+    {
+      buildings[building].updateMultiplierDisplay?.();
     }
   }
 
@@ -303,7 +369,7 @@ function App() {
         resources[resource].value - costs.resources[resource];
     }
     for (var worker in costs.workers) {
-      newWorkers[worker] = workers.worker.value - costs.workers[worker];
+      newWorkers[worker] = workers[worker].value - costs.workers[worker];
     }
     for (var building in costs.buildings) {
       newBuildings[building] =
@@ -332,7 +398,7 @@ function App() {
   }
 
   function checkAffordability(costs) {
-    console.log("check affordability costs", costs)
+    console.log("check affordability costs", costs);
     for (var resource in costs.resources) {
       if (costs.resources[resource] > resources[resource].value) {
         console.log("not enough" + resource);
@@ -340,13 +406,13 @@ function App() {
       }
     }
     for (var worker in costs.workers) {
-      if (costs[worker] > workers[worker]) {
+      if (costs.workers[worker] > workers[worker].value) {
         console.log("not enough" + worker);
         return false;
       }
     }
     for (var building in costs.buildings) {
-      if (costs[building] > workers[building]) {
+      if (costs.buildings[building] > workers[building].value) {
         console.log("not enough" + building);
         return false;
       }
@@ -358,32 +424,30 @@ function App() {
   function calcItemCost(item) {
     var currentPurchased = item.purchased;
     var amountToPurchase = purchaseAmount;
-    //have to calc for every resource
-    // var resourceInitCosts = item.initialCost.resources;
-    // var workerInitCosts = item.initialCost.workers;
-    // var buildingInitCosts = item.initialCost.buildings;
     var totalCost = {};
     //calc each category
     for (let category in item.initialCost) {
       totalCost[category] = {};
-      console.log("category", category);
+    //  console.log("category", category);
       for (let resource in item.initialCost[category]) {
         totalCost[category][resource] =
-          Math.ceil(
+          Math.round(Math.ceil(
             item.initialCost[category][resource] *
               ((Math.pow(item.priceIncMod, currentPurchased) *
-                (Math.pow(item.priceIncMod, amountToPurchase) - 1)) / 
-                (item.priceIncMod - 1)) * 100) / 100;
+                (Math.pow(item.priceIncMod, amountToPurchase) - 1)) /
+                (item.priceIncMod - 1))
+          ))
       }
     }
-    console.log("final costs", item, totalCost);
+     console.log("final costs", item, totalCost);
     return totalCost;
   }
 
   function constantTick() {
- //   console.log("tick");
+    //   console.log("tick");
     runIncome();
-    runUpkeep();
+    // runUpkeep();
+    runMilestones();
     setTimeout(constantTick, 1000);
   }
 
@@ -397,37 +461,66 @@ function App() {
     resourceIncome();
   }
 
+  function runMilestones(){
+    checkandUpdateMilestones();
+  }
+
   function resourceUpkeep() {
     var newResources = resourcesRef.current;
     var curWorkers = workersRef.current;
-    let foodIncome=workerIncome("food", curWorkers);
-    newResources.food.value += foodIncome
-    newResources.food.income = (foodIncome + "/s");
-    let woodIncome = workerIncome("wood", curWorkers);
-    newResources.wood.value += woodIncome
-    newResources.wood.income=(woodIncome + "/s");
-    setResources({...newResources});
- //   console.log("incometest", newResources);
+    let foodUpkeep = workerUpkeep("food", curWorkers);
+    newResources.food.value -= foodUpkeep;
+    newResources.food.income = foodUpkeep + "/s";
+    let woodUpkeep = workerUpkeep("wood", curWorkers);
+    newResources.wood.value -= woodUpkeep;
+    newResources.wood.income = woodUpkeep + "/s";
+    updateResources({ ...newResources });
+    //   console.log("incometest", newResources);
     // stoneIncome();
     //metalIncome();
+    setTickBool(false);
   }
 
   function resourceIncome() {
     var newResources = resourcesRef.current;
     var curWorkers = workersRef.current;
-    let foodIncome=workerIncome("food", curWorkers);
-    newResources.food.value += foodIncome
-    newResources.food.income = (foodIncome + "/s");
+    let foodIncome = workerIncome("food", curWorkers);
+    newResources.food.value += foodIncome;
+    newResources.food.income = foodIncome + "/s";
     let woodIncome = workerIncome("wood", curWorkers);
-    newResources.wood.value += woodIncome
-    newResources.wood.income=(woodIncome + "/s");
-    setResources({...newResources});
- //   console.log("incometest", newResources);
+    newResources.wood.value += woodIncome;
+    newResources.wood.income = woodIncome + "/s";
+    updateResources({ ...newResources });
+    //   console.log("incometest", newResources);
     // stoneIncome();
     //metalIncome();
   }
 
   function workerIncome(resource, curWorkers) {
+    var multipliers = calcMultipliers(resource);
+    var income = 0;
+ //console.log("inside workerIncome", curWorkers);
+    for (let worker in curWorkers) {
+      // console.log(
+      //   "workerincome ref current",
+      //   worker,
+      //   workersRef.current[worker].income[resource]
+      // );
+      if (curWorkers[worker].income[resource]) {
+        // console.log("worker makes resource", worker, resource);
+        //  console.log("worker makes resource", workersRef.current[worker], resource);
+        income +=Math.round(
+          curWorkers[worker].income[resource] *
+          curWorkers[worker].value *
+          multipliers.workers)
+      }
+    }
+    income = income * multipliers.global;
+   // console.log("income End function", resource, income);
+    return income;
+  }
+
+  function workerUpkeep(resource, curWorkers) {
     var multipliers = calcMultipliers(resource);
     var income = 0;
     console.log("inside workerIncome", curWorkers);
@@ -439,15 +532,15 @@ function App() {
       // );
       if (curWorkers[worker].income[resource]) {
         // console.log("worker makes resource", worker, resource);
-      //  console.log("worker makes resource", workersRef.current[worker], resource);
+        //  console.log("worker makes resource", workersRef.current[worker], resource);
         income +=
-          (curWorkers[worker].income[resource] *
-            curWorkers[worker].value *
-          multipliers.workers);
+          curWorkers[worker].income[resource] *
+          curWorkers[worker].value *
+          multipliers.workers;
       }
     }
     income = income * multipliers.global;
-     console.log("income End function", resource, income);
+    console.log("income End function", resource, income);
     return income;
   }
 
@@ -495,8 +588,7 @@ function App() {
     setPurchaseAmount(newValue);
     //recalc costs here
     refreshPrices();
-    setResources({ ...resources });
-    // setPeasantValue({...peasantValue, currentPrice:getDisplayCost(calcItemCost(peasantValue, newValue))});
+    //updateResources({ ...resources });
   }
 
   function refreshPrices() {
@@ -504,28 +596,33 @@ function App() {
     var newBuildings = buildings;
     //iterate through all items and calculate the prices
     for (let worker in workers) {
-      newWorkers[workers[worker].id].displayCost = getDisplayCost(calcItemCost(workers[worker]));
+      newWorkers[workers[worker].id].displayCost = getDisplayCost(
+        calcItemCost(workers[worker])
+      );
     }
     updateWorkers({ ...newWorkers });
     for (let building in buildings) {
-      newBuildings[buildings[building].id].displayCost = getDisplayCost(calcItemCost(
-        buildings[building]
-      ));
+      newBuildings[buildings[building].id].displayCost = getDisplayCost(
+        calcItemCost(buildings[building])
+      );
     }
-    setBuildings({ ...newBuildings });
+    updateBuildings({ ...newBuildings });
   }
 
   function getDisplayCost(cost) {
     console.log("getDisplaycost start", cost);
     var displayString = "";
-    for (let category in cost)
-    {
-       for (var resource in cost[category]) {
-      displayString += resource + ":" + cost[category][resource] + "  ";
-    }
+    for (let category in cost) {
+      for (var resource in cost[category]) {
+        displayString += resource + " " + cost[category][resource] + "  ";
+      }
     }
     console.log("endString", displayString);
     return displayString;
+  }
+
+  function getMilestones(){
+    console.log("milestones", milestoneRef.current);
   }
 
   return (
@@ -572,8 +669,12 @@ function App() {
           buildings={buildings}
           handleBuyItem={handleBuyItem}
         ></MultiplierDisplay>
+        <WorkerDisplay classes={classes}
+          workers={workers}
+          handleBuyItem={handleBuyItem}>
+        </WorkerDisplay>
 
-        <Grid
+        {/* <Grid
           container
           spacing={3}
           direction="row"
@@ -600,7 +701,8 @@ function App() {
               Prospectors: {workers.prospectors.value}
             </Paper>
           </Grid>
-          <Grid item xs={6}>
+        </Grid> */}
+        <Grid item xs={6}>
             <Slider
               defaultValue={1}
               getAriaValueText={purchaseAmountText}
@@ -617,13 +719,12 @@ function App() {
                 //  handleBuyItem(workers.peasants);
                 console.log("workers", workers);
                 console.log("workers ref", workersRef);
-                resourceIncome();
+                getMilestones();
               }}
             >
               <AddIcon />
             </IconButton>
           </Grid>
-        </Grid>
       </div>
     </div>
   );
