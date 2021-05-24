@@ -11,20 +11,29 @@ function ResourceDisplay(props)
         overflowX:'hidden'}}>
     <Grid container spacing={5}>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper} style={{backgroundColor:"Wheat"}}>Food: {props.resources.food.value}</Paper>
-          <Paper className={props.classes.paperSmall}>{props.resources.food.income}</Paper>
+          <Paper className={props.classes.foodCard} style={{backgroundColor:"Wheat"}}>Food: {props.resources.food.value}
+          <div style={{ fontSize: "x-small" }}>
+                      Total income {props.resources.food.income}
+                    </div></Paper>
         </Grid>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper} style={{backgroundColor:"BurlyWood"}}>Wood: {props.resources.wood.value}</Paper>
-          <Paper className={props.classes.paperSmall}>{props.resources.wood.income}</Paper>
+          <Paper className={props.classes.woodCard} style={{backgroundColor:"BurlyWood"}}>Wood: {props.resources.wood.value}
+          <div style={{ fontSize: "x-small" }}>
+                      Total income {props.resources.wood.income}
+                    </div></Paper>
+                   
         </Grid>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper}>Stone: {props.resources.stone.value}</Paper>
-          <Paper className={props.classes.paperSmall}>{props.resources.stone.income}</Paper>
+          <Paper className={props.classes.stoneCard}>Stone: {props.resources.stone.value}
+          <div style={{ fontSize: "x-small" }}>
+                      Total income {props.resources.stone.income}
+                    </div></Paper>
         </Grid>
         <Grid item xs={3}>
-          <Paper className={props.classes.paper}>Metal: {props.resources.metal.value}</Paper>
-          <Paper className={props.classes.paperSmall}>{props.resources.metal.income}</Paper>
+          <Paper className={props.classes.metalCard}>Metal: {props.resources.metal.value}
+          <div style={{ fontSize: "x-small" }}>
+                      Total income {props.resources.metal.income}
+                    </div></Paper>  
         </Grid>
       </Grid>
       </div>)

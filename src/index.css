@@ -12,3 +12,6 @@ code {
     monospace;
 }
 
+html, body, #App, #App>div {
+  height: 100%
+}
