@@ -1,13 +1,5 @@
 import "./App.css";
-import React, {
-  button,
-  useEffect,
-  useMemo,
-  useState,
-  useContext,
-  useRef,
-} from "react";
-import Button from "@material-ui/core/Button";
+import React, { useState, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
@@ -18,17 +10,23 @@ import ResourceDisplay from "./components/ResourceDisplay";
 import MultiplierDisplay from "./components/MultiplierDisplay";
 import Slider from "@material-ui/core/Slider";
 import WorkerDisplay from "./components/WorkerDisplay";
-import Background from './img/peasantBackground.png';
-import MainBackground from './img/mainBackground.jpg';
-import Banner from './components/Banner.js';
-
+import Background from "./img/peasantBackground.png";
+import MainBackground from "./img/mainBackground.jpg";
+import Banner from "./components/Banner.js";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import TabPanel from "@material-ui/lab/TabPanel";
+import TabContext from "@material-ui/lab/TabContext";
+import TabList from "@material-ui/lab/TabList";
+import AppBar from '@material-ui/core/AppBar';
+//import TabPanel from ""
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    height:"100%"
+    height: "100%",
   },
-  banner:{
+  banner: {
     padding: theme.spacing(2),
     textAlign: "center",
     color: theme.palette.text.secondary,
@@ -166,31 +164,29 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     backgroundColor: "Wheat",
     opacity: 1,
-    backgroundImage:
-      `url(${Background})`,
+    backgroundImage: `url(${Background})`,
     borderColor: "Green",
     border: "Solid",
   },
-  peasantCardInactive:
-  {
+  peasantCardInactive: {
     padding: theme.spacing(3),
     textAlign: "center",
     backgroundColor: "Grey",
     opacity: 1,
-    backgroundImage:
-      `url(${Background})`,
+    backgroundImage: `url(${Background})`,
     borderColor: "Grey",
     border: "Solid",
   },
-  transBox:{
+  transBox: {
     margin: "30px",
     backgroundColor: "rgba(255, 255, 255, 0.6)",
     border: "1px solid black",
-   // opacity: "0.6",
-  }
+    // opacity: "0.6",
+  },
 }));
 
 function App() {
+  const [tabIndex, setTabIndex] = useState('1');
   const classes = useStyles();
   const [purchaseAmount, setPurchaseAmount] = useState(1);
   const purchaseAmountRef = useRef(purchaseAmount);
@@ -202,16 +198,31 @@ function App() {
       value: 10,
       multiplier: { global: 0, worker: 0 },
     },
-    wood: { id: "wood", income: "0/s", value: 1, multiplier: { global: 0, worker: 0 } },
-    stone: { id: "stone", income: "0/s", value: 1, multiplier: { global: 0, worker: 0 } },
-    metal: { id: "metal", income: "0/s", value: 1, multiplier: { global: 0, worker: 0 } },
+    wood: {
+      id: "wood",
+      income: "0/s",
+      value: 1,
+      multiplier: { global: 0, worker: 0 },
+    },
+    stone: {
+      id: "stone",
+      income: "0/s",
+      value: 1,
+      multiplier: { global: 0, worker: 0 },
+    },
+    metal: {
+      id: "metal",
+      income: "0/s",
+      value: 1,
+      multiplier: { global: 0, worker: 0 },
+    },
   });
   const resourcesRef = useRef(resources);
 
   const [workers, setWorkers] = useState({
     peasants: {
       id: "peasants",
-      name:"Peasants",
+      name: "Peasants",
       value: 0,
       purchased: 0,
       initialCost: { resources: { food: 10 }, workers: {}, buildings: {} },
@@ -223,12 +234,8 @@ function App() {
         stone: 0.001,
         metal: 0.00001,
       },
-      lastTickIncome:
-      {
-
-      },
-      displayIncome:"food 0/s"
-      ,
+      lastTickIncome: {},
+      displayIncome: "food 0/s",
       cardStyle: {
         active: classes.peasantCardActive,
         inactive: classes.peasantCardInactive,
@@ -237,7 +244,7 @@ function App() {
     },
     farmers: {
       id: "farmers",
-      name:"Farmers",
+      name: "Farmers",
       value: 0,
       purchased: 0,
       initialCost: {
@@ -250,11 +257,8 @@ function App() {
       income: {
         food: 5,
       },
-      lastTickIncome:
-      {
-
-      },
-      displayIncome:"food 0/s",
+      lastTickIncome: {},
+      displayIncome: "food 0/s",
       cardStyle: {
         active: classes.foodCardActive,
         inactive: classes.foodCardInactive,
@@ -263,7 +267,7 @@ function App() {
     },
     woodsmen: {
       id: "woodsmen",
-      name:"Wood Gatherer",
+      name: "Wood Gatherer",
       value: 0,
       purchased: 0,
       initialCost: {
@@ -272,11 +276,8 @@ function App() {
         buildings: {},
       },
       displayCost: "",
-      lastTickIncome:
-      {
-
-      },
-      displayIncome:"food 0/s",
+      lastTickIncome: {},
+      displayIncome: "food 0/s",
       priceIncMod: 1.3,
       income: {
         wood: 0.1,
@@ -289,20 +290,17 @@ function App() {
     },
     quarrymen: {
       id: "quarrymen",
-      name:"Quarriers",
+      name: "Quarriers",
       value: 0,
       purchased: 0,
       initialCost: { resources: { food: 1 }, workers: {}, buildings: {} },
       displayCost: "",
-      displayIncome:"food 0/s",
+      displayIncome: "food 0/s",
       priceIncMod: 1.5,
       income: {
         stone: 0.1,
       },
-      lastTickIncome:
-      {
-
-      },
+      lastTickIncome: {},
       cardStyle: {
         active: classes.stoneCardActive,
         inactive: classes.stoneCardInactive,
@@ -311,20 +309,17 @@ function App() {
     },
     prospectors: {
       id: "prospectors",
-      name:"Prospectors",
+      name: "Prospectors",
       value: 0,
       purchased: 0,
       initialCost: { resources: { food: 1 }, workers: {}, buildings: {} },
       displayCost: "",
-      displayIncome:"food 0/s",
+      displayIncome: "food 0/s",
       priceIncMod: 1.9,
       income: {
         metal: 0.1,
       },
-      lastTickIncome:
-      {
-
-      },
+      lastTickIncome: {},
       cardStyle: {
         active: classes.metalCardActive,
         inactive: classes.metalCardInactive,
@@ -337,7 +332,7 @@ function App() {
   const [buildings, setBuildings] = useState({
     fields: {
       id: "fields",
-      name:"Fields",
+      name: "Fields",
       value: 0,
       purchased: 0,
       initialCost: { resources: { food: 1 }, workers: {}, buildings: {} },
@@ -359,7 +354,7 @@ function App() {
     },
     forests: {
       id: "forests",
-      name:"Forests",
+      name: "Forests",
       value: 0,
       purchased: 0,
       initialCost: { resources: { food: 1 }, workers: {}, buildings: {} },
@@ -381,7 +376,7 @@ function App() {
     },
     outcrops: {
       id: "outcrops",
-      name:"Outcrops",
+      name: "Outcrops",
       value: 0,
       purchased: 0,
       initialCost: { resources: { food: 1 }, workers: {}, buildings: {} },
@@ -403,7 +398,7 @@ function App() {
     },
     prospects: {
       id: "prospects",
-      name:"Prospects",
+      name: "Prospects",
       value: 0,
       purchased: 0,
       initialCost: { resources: { food: 1 }, workers: {}, buildings: {} },
@@ -536,7 +531,7 @@ function App() {
         tempResources.buildings[item.id] = newItem;
       }
       //set values now
-     // console.log("tempResources before set", tempResources);
+      // console.log("tempResources before set", tempResources);
       updateResources({ ...resources, ...tempResources.resources });
       updateWorkers({ ...workers, ...tempResources.workers });
       updateBuildings({ ...buildings, ...tempResources.buildings });
@@ -544,7 +539,7 @@ function App() {
       refreshMultiplierDisplays();
     }
 
-    if (!tickingBool) {      
+    if (!tickingBool) {
       setTickBool(true);
       constantTick();
     }
@@ -555,7 +550,7 @@ function App() {
     var newWorkers = {};
     var newBuildings = {};
     for (var resource in costs.resources) {
-     // console.log("resources in calcafterbuy", resource, resources);
+      // console.log("resources in calcafterbuy", resource, resources);
       newResources[resource] =
         resources[resource].value - costs.resources[resource];
     }
@@ -576,7 +571,7 @@ function App() {
   }
 
   function refreshMultiplierDisplays() {
-    let curBuildings=buildingsRef.current;
+    let curBuildings = buildingsRef.current;
     for (let building in curBuildings) {
       curBuildings[building].updateMultiplierDisplay?.();
     }
@@ -596,25 +591,25 @@ function App() {
   }
 
   function checkAffordability(costs) {
-  //  console.log("check affordability costs", costs);
-  let curResources = resourcesRef.current;
-  let curWorkers = workersRef.current;
-  let curBuildings = buildingsRef.current;
+    //  console.log("check affordability costs", costs);
+    let curResources = resourcesRef.current;
+    let curWorkers = workersRef.current;
+    let curBuildings = buildingsRef.current;
     for (var resource in costs.resources) {
       if (costs.resources[resource] > curResources[resource].value) {
-     //   console.log("not enough" + resource);
+        //   console.log("not enough" + resource);
         return false;
       }
     }
     for (var worker in costs.workers) {
       if (costs.workers[worker] > curWorkers[worker].value) {
-       // console.log("not enough" + worker);
+        // console.log("not enough" + worker);
         return false;
       }
     }
     for (var building in costs.buildings) {
       if (costs.buildings[building] > curBuildings[building].value) {
-      //  console.log("not enough" + building);
+        //  console.log("not enough" + building);
         return false;
       }
     }
@@ -643,7 +638,7 @@ function App() {
         );
       }
     }
-   // console.log("final costs", item, totalCost);
+    // console.log("final costs", item, totalCost);
     return totalCost;
   }
 
@@ -659,7 +654,7 @@ function App() {
 
   function runUpkeep() {
     //calc income for each resource individually
-   // resourceUpkeep();
+    // resourceUpkeep();
   }
 
   function runIncome() {
@@ -720,11 +715,11 @@ function App() {
             curWorkers[worker].value *
             multipliers.workers
         );
-        income += tempIncome
-        curWorkers[worker].lastTickIncome[resource]=tempIncome;
+        income += tempIncome;
+        curWorkers[worker].lastTickIncome[resource] = tempIncome;
       }
     }
-    updateWorkers({...curWorkers});
+    updateWorkers({ ...curWorkers });
     income = income * multipliers.global;
     // console.log("income End function", resource, income);
     return income;
@@ -770,30 +765,30 @@ function App() {
     return `${value}x`;
   }
   function updatePurchaseAmount(event, newValue) {
-     console.log(newValue);
+    console.log(newValue);
     setPurchaseAmount(newValue);
-    purchaseAmountRef.current=newValue;
+    purchaseAmountRef.current = newValue;
     refreshPrices();
   }
 
   function refreshDisplayIncomes() {
     var newWorkers = workersRef.current;
-   // console.log("newWorkers, purchaseAmount", newWorkers, purchaseAmount);
+    // console.log("newWorkers, purchaseAmount", newWorkers, purchaseAmount);
     //iterate through all items and calculate the prices
     for (let worker in newWorkers) {
-      newWorkers[worker].displayIncome = formatDisplayIncome(newWorkers[worker])
+      newWorkers[worker].displayIncome = formatDisplayIncome(
+        newWorkers[worker]
+      );
     }
     updateWorkers({ ...newWorkers });
   }
 
-  function formatDisplayIncome(worker)
-  {
+  function formatDisplayIncome(worker) {
     let workingString = "";
-    for (let resource in worker.lastTickIncome)
-    {
-      if (worker.lastTickIncome[resource]>0.5)
-      {
-        workingString+=resource + " " + worker.lastTickIncome[resource]+ " /s "
+    for (let resource in worker.lastTickIncome) {
+      if (worker.lastTickIncome[resource] > 0.5) {
+        workingString +=
+          resource + " " + worker.lastTickIncome[resource] + " /s ";
       }
     }
     return workingString;
@@ -801,7 +796,7 @@ function App() {
 
   function refreshPrices() {
     var newWorkers = workersRef.current;
-   // console.log("newWorkers, purchaseAmount", newWorkers, purchaseAmount);
+    // console.log("newWorkers, purchaseAmount", newWorkers, purchaseAmount);
     var newBuildings = buildingsRef.current;
     //iterate through all items and calculate the prices
     for (let worker in newWorkers) {
@@ -818,20 +813,17 @@ function App() {
     updateWorkers({ ...newWorkers });
     for (let building in newBuildings) {
       let buildingCost = calcItemCost(newBuildings[building]);
-      if (checkAffordability(buildingCost))
-      {
+      if (checkAffordability(buildingCost)) {
         newBuildings[building].cardStyle.current =
-        newBuildings[building].cardStyle.active;
-      }
-      else
-      {
+          newBuildings[building].cardStyle.active;
+      } else {
         newBuildings[building].cardStyle.current =
-        newBuildings[building].cardStyle.inactive;
+          newBuildings[building].cardStyle.inactive;
       }
       newBuildings[building].displayCost = getDisplayCost(buildingCost);
     }
     updateBuildings({ ...newBuildings });
-   // console.log("Refresh Prices", newWorkers, newBuildings);
+    // console.log("Refresh Prices", newWorkers, newBuildings);
   }
 
   function getDisplayCost(cost) {
@@ -850,11 +842,16 @@ function App() {
     console.log("milestones", milestoneRef.current);
   }
 
-  return ( 
-    <div className="App" style={{height:"100%"}}>
-     <Banner classes={classes}></Banner>
-      <div className={classes.root} style={{backgroundImage:`url(${MainBackground})`,
-       backgroundRepeat:'round'}}>
+  return (
+    <div className="App" style={{ height: "100%" }}>
+      <Banner classes={classes}></Banner>
+      <div
+        className={classes.root}
+        style={{
+          backgroundImage: `url(${MainBackground})`,
+          backgroundRepeat: "round",
+        }}
+      >
         <ResourceDisplay
           classes={classes}
           resources={resources}
@@ -867,27 +864,77 @@ function App() {
           justify="center"
           alignItems="center"
         >
-          <Grid item xs={6} onClick={() => {
-                    handleBuyItem(workers.peasants);
-                  }}>
+          <Grid
+            item
+            xs={6}
+            onClick={() => {
+              handleBuyItem(workers.peasants);
+            }}
+          >
             <Tooltip
               disableFocusListener
               disableTouchListener
               title="Peasants generate resources, and are trained to be workers"
             >
-              <Paper className={workers.peasants.cardStyle.current} >
-                 <div className={classes.transBox}>Peasants: {workers.peasants.value}
-                <div style={{ fontSize: "x-small" }}>
-                      Total income {workers.peasants.displayIncome}
-                      <br></br> Cost: {workers.peasants.displayCost}
-                    </div>
-                    </div>
+              <Paper className={workers.peasants.cardStyle.current}>
+                <div className={classes.transBox}>
+                  Peasants: {workers.peasants.value}
+                  <div style={{ fontSize: "x-small" }}>
+                    Total income {workers.peasants.displayIncome}
+                    <br></br> Cost: {workers.peasants.displayCost}
+                  </div>
+                </div>
               </Paper>
             </Tooltip>
           </Grid>
         </Grid>
-
-        <MultiplierDisplay
+        <TabContext value={tabIndex}>
+          <div className={classes.transBox}>
+          <TabList value={tabIndex} centered onChange={(e, index) => setTabIndex(index)}>
+            <Tab label={"Rural Workers"} value="1" />
+            <Tab label={"Peasants"} value="2"/>
+            <Tab label={"City Workers"} value="3" />
+            <Tab label={"Clergy"} value="4" />
+            <Tab label={"Nobility"} value="5" />
+          </TabList>
+          </div>
+          <TabPanel value="1"><MultiplierDisplay
+          classes={classes}
+          buildings={buildings}
+          handleBuyItem={handleBuyItem}
+        ></MultiplierDisplay>
+        <WorkerDisplay
+          classes={classes}
+          workers={workers}
+          handleBuyItem={handleBuyItem}
+        ></WorkerDisplay>
+         <Grid container   direction="row"
+  justify="center"
+  alignItems="center">
+        <Grid item xs={6} justify="center" alignItems="center" className={classes.transBox}>
+          <Slider
+            defaultValue={1}
+            getAriaValueText={purchaseAmountText}
+            aria-labelledby="purchase-amount-slider"
+            step={1}
+            min={1}
+            max={100}
+            onChangeCommitted={updatePurchaseAmount}
+            valueLabelDisplay="auto"
+            marks={marks}
+          />
+          <IconButton
+            onClick={() => {
+              getMilestones();
+            }}
+          >
+            <AddIcon />
+          </IconButton>
+        </Grid></Grid></TabPanel>
+          <TabPanel value="2"></TabPanel>
+          <TabPanel value="3"></TabPanel>
+        </TabContext>
+        {/* <MultiplierDisplay
           classes={classes}
           buildings={buildings}
           handleBuyItem={handleBuyItem}
@@ -897,8 +944,8 @@ function App() {
           classes={classes}
           workers={workers}
           handleBuyItem={handleBuyItem}
-        ></WorkerDisplay>
-
+        ></WorkerDisplay> */}
+  <div className={classes.transBox}>
         <Grid item xs={6} justify="center" alignItems="center">
           <Slider
             defaultValue={1}
@@ -913,13 +960,13 @@ function App() {
           />
           <IconButton
             onClick={() => {
-              
               getMilestones();
             }}
           >
             <AddIcon />
           </IconButton>
         </Grid>
+        </div>
       </div>
     </div>
   );
